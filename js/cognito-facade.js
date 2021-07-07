@@ -81,7 +81,9 @@ function efetuarLoginCognito(userName, password, callback) {
 }
 
 function efetuarLogoutCognito(callback) {
-    console.log('efetuando logout')
+    userPool.getCurrentUser().signOut()
+        
+    location.reload()
 }
 
 function apagarUsuarioCognito(callback) {
@@ -98,11 +100,11 @@ function trocarSenhaCognito(oldPassword, newPassword, callback) {
 }
 
 function esqueciSenhaCognito(userName, callback) {
-    console.log('esqueci senha')
+    getUser(userName).forgotPassword(tratarCallback(callback))
 }
 
 function confirmarEsqueciSenha(userName, code, newPassword, callback) {
-    console.log('confirmar esqueci senha')
+    getUser(userName).confirmPassword(code, newPassword, tratarCallback(callback))
 }
 
 function consultarDadosUsuario(callback) {
