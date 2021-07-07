@@ -87,7 +87,19 @@ function efetuarLogoutCognito(callback) {
 }
 
 function apagarUsuarioCognito(callback) {
-    console.log('apagando usuário')
+    if(cognitoUser) {
+        cognitoUser.deleteUser((err, result) => {
+            if(err) {
+                callback(err, null)
+                return
+            } else {
+                cognitouser = null
+                callback(null, result)
+            }
+        })
+        return
+    }
+    callback({name: 'Erro', message: 'Usuário não está logado!'}, null)
 }
 
 function trocarSenhaCognito(oldPassword, newPassword, callback) {
