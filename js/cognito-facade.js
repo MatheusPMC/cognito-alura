@@ -53,15 +53,31 @@ function cadastrarCognito(userName, name, userEmail, userPassword, callback) {
 }
 
 function getUser(userName) {
-    console.log('obtendo usuário')
+    var userData = {
+        Username: userName,
+        Pool: getUserPool()
+    }
+    cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData)
+    return cognitoUser
 }
 
 function confirmaCadastroCognito(userName, code, callback) {
-    console.log('confirmar cadastro')
+    getUser(userName).confirmRegistration(code, true, callback)
 }
 
 function efetuarLoginCognito(userName, password, callback) {
-    console.log('efetuando login')
+    let authenticationData = {
+        Username: userName,
+        Password: password
+    }
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(
+        authenticationData
+    )
+
+    getUser(userName).authenticateUser(
+        authenticationDetails,
+        tratarCallback(callback)
+    )
 }
 
 function efetuarLogoutCognito(callback) {
@@ -73,7 +89,12 @@ function apagarUsuarioCognito(callback) {
 }
 
 function trocarSenhaCognito(oldPassword, newPassword, callback) {
-    console.log('trocando senha')
+    if(cognitoUser) {
+        cognitoUser.changePassword(oldPassword, newPassword, callback);
+        return
+    }
+
+    callback({name: "Erro", message: "Usuário não está logado!"}, null)
 }
 
 function esqueciSenhaCognito(userName, callback) {
@@ -84,8 +105,22 @@ function confirmarEsqueciSenha(userName, code, newPassword, callback) {
     console.log('confirmar esqueci senha')
 }
 
-function consultarDadosUsuario(updateCallback) {
-    console.log('consultar dados usuário')
+function consultarDadosUsuario(callback) {
+    if (cognitoUser) {
+        cognitoUser.getUserAttributes((err, result) => {
+            if (err) {
+                callback({})
+                return
+            } else {
+                let userInfo = { name: cognitoUser.username }
+                for (let k = 0; k < result.length; k++) {
+                    userInfo[result[k].getName()] = result[k].getValue()
+                }
+
+                callback(userInfo)
+            }
+        })
+    }
 }
 
 function tratarCallback(callback) {
